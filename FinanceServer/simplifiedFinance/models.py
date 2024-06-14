@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 # Create your models here.
@@ -64,3 +65,8 @@ class Transaction(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Permissions(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.RESTRICT)
+    user = models.ForeignKey(User, on_delete=models.RESTRICT)
