@@ -16,9 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+import simplifiedFinance.views as sfv
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('test/', simplifiedFinance.views.test),
+    path('test/', sfv.test),
 ]
