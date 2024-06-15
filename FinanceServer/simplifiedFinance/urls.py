@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import configViews, authViews, accountViews, vendorsViews
+from .views import configViews, authViews, accountViews, vendorsViews, projectViews
 
 
 urlpatterns = [
@@ -20,4 +20,8 @@ urlpatterns = [
     path("createVendor/", vendorsViews.createVendor),
     path("deleteVendor/<str:name>", vendorsViews.deleteVendor),
     path("updateVendor/<str:name>", vendorsViews.updateVendor),
+    path("getProjects/", projectViews.getProjects),
+    path("createProject/", projectViews.createProject),
+    path("deleteProject/<str:name>", projectViews.deleteProject),
+    path("endProject/<str:name>", projectViews.endProject),
 ]
