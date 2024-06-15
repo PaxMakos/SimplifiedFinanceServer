@@ -4,10 +4,10 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class Invoice(models.Model):
-    file = models.FileField(upload_to="%Y/%m/")
     date = models.DateField()
     number = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
+    file = models.FileField(upload_to=f"%Y/%m/{number}")
 
     def __str__(self):
         return self.number
@@ -70,3 +70,15 @@ class Transaction(models.Model):
 class Permissions(models.Model):
     project = models.ForeignKey(Project, on_delete=models.RESTRICT)
     user = models.ForeignKey(User, on_delete=models.RESTRICT)
+
+
+class Return(models.Model):
+    id = models.AutoField(primary_key=True)
+    project = models.ForeignKey(Project, on_delete=models.RESTRICT)
+    title = models.CharField(max_length=100)
+    date = models.DateField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(null=True, blank=True)
+    accountToReturn = models.CharField(max_length=26)
+    invoice = models.FileField(upload_to="%Y/waiting/")
+
