@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import configViews, authViews, accountViews
+from .views import configViews, authViews, accountViews, vendorsViews
 
 
 urlpatterns = [
@@ -16,4 +16,8 @@ urlpatterns = [
     path("getAccounts/", accountViews.getAccounts),
     path("createAccount/", accountViews.createAccount),
     path("deleteAccount/<str:name>", accountViews.deleteAccount),
+    path("getVendors/", vendorsViews.getVendors),
+    path("createVendor/", vendorsViews.createVendor),
+    path("deleteVendor/<str:name>", vendorsViews.deleteVendor),
+    path("updateVendor/<str:name>", vendorsViews.updateVendor),
 ]
