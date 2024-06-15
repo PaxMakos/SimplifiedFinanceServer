@@ -1,5 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
+import os
+
+
+def uploadTo(instance, filename):
+    base, extension = os.path.splitext(filename)
+    path = f"{instance.date.year}/{instance.date.month}/{instance.number}{extension}"
+    return path
 
 
 # Create your models here.
@@ -7,7 +14,7 @@ class Invoice(models.Model):
     date = models.DateField()
     number = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
-    file = models.FileField(upload_to=f"%Y/%m/{number}")
+    file = models.FileField(upload_to=uploadTo)
 
     def __str__(self):
         return self.number

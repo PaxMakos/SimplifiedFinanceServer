@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import configViews, authViews, accountViews, vendorsViews, projectViews
+from .views import configViews, authViews, accountViews, vendorsViews, projectViews, invoiceViews
 
 
 urlpatterns = [
@@ -24,4 +24,5 @@ urlpatterns = [
     path("createProject/", projectViews.createProject),
     path("deleteProject/<str:name>", projectViews.deleteProject),
     path("endProject/<str:name>", projectViews.endProject),
+    path("downloadInvoice/<str:number>", invoiceViews.downloadInvoice),
 ]
