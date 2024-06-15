@@ -33,9 +33,9 @@ class Project(models.Model):
 
 class SubAccount(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, default=id)
     accountNumber = models.CharField(max_length=26)
-    balance = models.DecimalField(max_digits=10, decimal_places=2)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):
         return self.name
