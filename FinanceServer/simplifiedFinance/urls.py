@@ -1,5 +1,5 @@
-from django.urls import path
-from .views import configViews, authViews
+from django.urls import path, include
+from .views import configViews, authViews, accountViews
 
 
 urlpatterns = [
@@ -13,4 +13,7 @@ urlpatterns = [
     path("getPermissions/", authViews.getPermissions),
     path("givePermissions/", authViews.givePermissions),
     path("removePermissions/<str:user>/<str:project>", authViews.removePermissions),
+    path("getAccounts/", accountViews.getAccounts),
+    path("createAccount/", accountViews.createAccount),
+    path("deleteAccount/<str:name>", accountViews.deleteAccount),
 ]
