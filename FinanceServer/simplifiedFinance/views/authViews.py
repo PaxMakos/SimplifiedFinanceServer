@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from ..models import Permissions
 
 
 @require_http_methods(["POST"])
@@ -59,5 +60,15 @@ def sessionInfo(request):
     if request.user.is_authenticated:
         sessionKey = request.session.session_key
         return JsonResponse({"status": "success", "sessionKey": sessionKey})
+    else:
+        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+
+
+@require_http_methods(["GET"])
+@csrf_exempt
+def getPermissions(request):
+    if request.user.is_authenticated:
+        permissions = Permissions.objects.filter(user=request.user)
+        return JsonResponse({"status": "success", "permissions": [p.project.name for p in permissions]})
     else:
         return JsonResponse({"status": "error", "message": "User is not authenticated"})
