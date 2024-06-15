@@ -11,4 +11,6 @@ urlpatterns = [
     path("register/", authViews.registerUser),
     path("session/", authViews.sessionInfo),
     path("getPermissions/", authViews.getPermissions),
+    path("givePermissions/", authViews.givePermissions),
+    path("removePermissions/<str:user>/<str:project>", authViews.removePermissions),
 ]
