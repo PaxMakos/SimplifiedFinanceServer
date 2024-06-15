@@ -20,7 +20,9 @@ def downloadInvoice(request, number):
 
                 if os.path.exists(path):
                     with open(path, "rb") as file:
-                        return HttpResponse(file.read(), content_type="application/pdf")
+                        response = HttpResponse(file.read(), content_type="application/force-download")
+                        response["Content-Disposition"] = f"attachment; filename={invoice.file.name}"
+                        return response
                 else:
                     return JsonResponse({"status": "error", "message": "File does not exist"})
         except Invoice.DoesNotExist:
