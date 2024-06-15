@@ -3,6 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse
 from ..models import SubAccount
 from django.core import serializers
+from django.db import IntegrityError
 
 
 @require_http_methods(["GET"])
@@ -36,12 +37,19 @@ def createAccount(request):
 @require_http_methods(["DELETE"])
 @csrf_exempt
 def deleteAccount(request, name):
-    if request.user.is_authenticated:
-        if request.user.is_superuser:
-            account = SubAccount.objects.get(name=name)
-            account.delete()
-            return JsonResponse({"status": "success"})
+    try:
+        if request.user.is_authenticated:
+            if request.user.is_superuser:
+                account = SubAccount.objects.get(name=name)
+                account.delete()
+                return JsonResponse({"status": "success"})
+            else:
+                return JsonResponse({"status": "error", "message": "User is not a superuser"})
         else:
-            return JsonResponse({"status": "error", "message": "User is not a superuser"})
-    else:
-        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+            return JsonResponse({"status": "error", "message": "User is not authenticated"})
+    except SubAccount.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Account does not exist"})
+    except IntegrityError:
+        return JsonResponse({"status": "error", "message": "Account is in use"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
