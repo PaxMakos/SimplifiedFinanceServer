@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import configViews, authViews, accountViews, vendorsViews, projectViews, invoiceViews
+from .views import configViews, authViews, accountViews, vendorsViews, projectViews, invoiceViews, transactionViews
 
 
 urlpatterns = [
@@ -29,5 +29,11 @@ urlpatterns = [
     path("createInvoice/", invoiceViews.createInvoice),
     path("deleteInvoice/<str:number>", invoiceViews.deleteInvoice),
     path("updateInvoice/<str:number>", invoiceViews.updateInvoice),
+    path("getTransactions/", transactionViews.getTransactions),
+    path("createTransactionBasic/", transactionViews.createTransactionBasic),
+    path("createTransactionWithInvoice/", transactionViews.createTransactionWithInvoice),
+    path("createTransactionNewVendor/", transactionViews.createTransactionNewVendor),
+    path("deleteTransaction/<int:id>", transactionViews.deleteTransaction),
+    path("updateTransaction/<int:id>", transactionViews.updateTransaction),
 
 ]
