@@ -13,18 +13,15 @@ def downloadInvoice(request, number):
         try:
             invoice = Invoice.objects.get(number=number)
 
-            if invoice is None:
-                return JsonResponse({"status": "error", "message": "Invoice does not exist"})
-            else:
-                path = invoice.file.path
+            path = invoice.file.path
 
-                if os.path.exists(path):
-                    with open(path, "rb") as file:
-                        response = HttpResponse(file.read(), content_type="application/force-download")
-                        response["Content-Disposition"] = f"attachment; filename={invoice.file.name}"
-                        return response
-                else:
-                    return JsonResponse({"status": "error", "message": "File does not exist"})
+            if os.path.exists(path):
+                with open(path, "rb") as file:
+                    response = HttpResponse(file.read(), content_type="application/force-download")
+                    response["Content-Disposition"] = f"attachment; filename={invoice.file.name}"
+                    return response
+            else:
+                return JsonResponse({"status": "error", "message": "File does not exist"})
         except Invoice.DoesNotExist:
             return JsonResponse({"status": "error", "message": "Invoice does not exist"})
         except Exception as e:
@@ -32,3 +29,88 @@ def downloadInvoice(request, number):
     else:
         return JsonResponse({"status": "error", "message": "User is not authenticated"})
 
+
+@require_http_methods(["GET"])
+@csrf_exempt
+def getInvoice(request, number):
+    if request.user.is_authenticated:
+        try:
+            invoice = Invoice.objects.get(number=number)
+
+            return JsonResponse({
+                "status": "success",
+                "number": invoice.number,
+                "date": invoice.date,
+                "description": invoice.description,
+                "file": invoice.file.name
+            })
+        except Invoice.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Invoice does not exist"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)})
+    else:
+        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def createInvoice(request):
+    if request.user.is_authenticated:
+        try:
+            date = request.POST.get("date")
+            number = request.POST.get("number")
+            description = request.POST.get("description")
+            file = request.FILES.get("file")
+
+            invoice = Invoice(date=date, number=number, description=description, file=file)
+            invoice.save()
+
+            return JsonResponse({"status": "success"})
+        except IntegrityError:
+            return JsonResponse({"status": "error", "message": "Invoice with this number already exists"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)})
+    else:
+        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def updateInvoice(request, number):
+    if request.user.is_authenticated:
+        try:
+            invoice = Invoice.objects.get(number=number)
+
+            date = request.POST.get("date")
+            description = request.POST.get("description")
+            file = request.FILES.get("file")
+
+            invoice.date = date
+            invoice.description = description
+            invoice.file = file
+            invoice.save()
+
+            return JsonResponse({"status": "success"})
+        except Invoice.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Invoice does not exist"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)})
+    else:
+        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+
+
+@require_http_methods(["DELETE"])
+@csrf_exempt
+def deleteInvoice(request, number):
+    if request.user.is_authenticated:
+        try:
+            invoice = Invoice.objects.get(number=number)
+            invoice.delete()
+
+            return JsonResponse({"status": "success"})
+        except Invoice.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Invoice does not exist"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)})
+    else:
+        return JsonResponse({"status": "error", "message": "User is not authenticated"})
