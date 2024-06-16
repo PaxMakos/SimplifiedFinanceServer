@@ -66,7 +66,7 @@ class Transaction(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     account = models.ForeignKey(SubAccount, on_delete=models.RESTRICT)
     vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT)
-    project = models.ForeignKey(Project, on_delete=models.RESTRICT)
+    project = models.ForeignKey(Project, on_delete=models.RESTRICT, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     invoice = models.ForeignKey(Invoice, on_delete=models.RESTRICT, null=True, blank=True)
 

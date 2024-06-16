@@ -5,6 +5,7 @@ from ..models import Project, Permissions
 from django.core import serializers
 from django.db import IntegrityError
 
+
 @require_http_methods(["GET"])
 @csrf_exempt
 def getProjects(request):
@@ -14,6 +15,7 @@ def getProjects(request):
         return HttpResponse(data, content_type="application/xml")
     else:
         return JsonResponse({"status": "error", "message": "User is not authenticated"})
+
 
 @require_http_methods(["POST"])
 @csrf_exempt
@@ -32,6 +34,7 @@ def createProject(request):
             return JsonResponse({"status": "error", "message": "User is not a superuser"})
     else:
         return JsonResponse({"status": "error", "message": "User is not authenticated"})
+
 
 @require_http_methods(["DELETE"])
 @csrf_exempt

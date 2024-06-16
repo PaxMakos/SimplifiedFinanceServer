@@ -25,4 +25,9 @@ urlpatterns = [
     path("deleteProject/<str:name>", projectViews.deleteProject),
     path("endProject/<str:name>", projectViews.endProject),
     path("downloadInvoice/<str:number>", invoiceViews.downloadInvoice),
+    path("getInvoice/<str:number>", invoiceViews.getInvoice),
+    path("createInvoice/", invoiceViews.createInvoice),
+    path("deleteInvoice/<str:number>", invoiceViews.deleteInvoice),
+    path("updateInvoice/<str:number>", invoiceViews.updateInvoice),
+
 ]

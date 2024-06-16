@@ -53,7 +53,7 @@ def deleteVendor(request, name):
         return JsonResponse({"status": "error", "message": str(e)})
 
 
-@require_http_methods(["PUT"])
+@require_http_methods(["POST"])
 @csrf_exempt
 def updateVendor(request, name):
     try:
@@ -61,10 +61,12 @@ def updateVendor(request, name):
             if request.user.is_superuser:
                 vendor = Vendor.objects.get(name=name)
                 vendor.name = request.POST.get("name")
+                print(name)
                 vendor.address = request.POST.get("address")
                 vendor.NIPNumber = request.POST.get("NIPNumber")
                 vendor.accountNumber = request.POST.get("accountNumber")
                 vendor.save()
+                print(name)
                 return JsonResponse({"status": "success"})
             else:
                 return JsonResponse({"status": "error", "message": "User is not a superuser"})
