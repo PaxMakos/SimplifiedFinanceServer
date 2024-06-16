@@ -1,11 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
 import os
+from datetime import datetime
 
 
 def uploadTo(instance, filename):
     base, extension = os.path.splitext(filename)
-    path = f"{instance.date.year}/{instance.date.month}/{instance.number}{extension}"
+    date = datetime.strptime(instance.date, "%Y-%m-%d").date()
+    path = f"{date.year}/{date.month}/{instance.number}{extension}"
     return path
 
 

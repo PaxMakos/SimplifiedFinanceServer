@@ -4,6 +4,7 @@ from django.http import JsonResponse, HttpResponse
 from ..models import Vendor
 from django.core import serializers
 from django.db import IntegrityError
+from ..operations.vendorsOperations import createVendor
 
 
 @require_http_methods(["GET"])
@@ -21,12 +22,9 @@ def getVendors(request):
 @csrf_exempt
 def createVendor(request):
     if request.user.is_authenticated:
-        name = request.POST.get("name")
-        address = request.POST.get("address")
-        NIPNumber = request.POST.get("NIPNumber")
-        accountNumber = request.POST.get("accountNumber")
-        vendor = Vendor(name=name, address=address, NIPNumber=NIPNumber, accountNumber=accountNumber)
-        vendor.save()
+
+        vendor = createVendor(request)
+
         return JsonResponse({"status": "success", "id": vendor.id})
     else:
         return JsonResponse({"status": "error", "message": "User is not authenticated"})
@@ -60,13 +58,13 @@ def updateVendor(request, name):
         if request.user.is_authenticated:
             if request.user.is_superuser:
                 vendor = Vendor.objects.get(name=name)
-                vendor.name = request.POST.get("name")
-                print(name)
-                vendor.address = request.POST.get("address")
-                vendor.NIPNumber = request.POST.get("NIPNumber")
-                vendor.accountNumber = request.POST.get("accountNumber")
+
+                vendor.name = request.POST.get("vendorName")
+                vendor.address = request.POST.get("vendorAddress")
+                vendor.NIPNumber = request.POST.get("vendorNIPNumber")
+                vendor.accountNumber = request.POST.get("vendorAccountNumber")
                 vendor.save()
-                print(name)
+
                 return JsonResponse({"status": "success"})
             else:
                 return JsonResponse({"status": "error", "message": "User is not a superuser"})

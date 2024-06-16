@@ -84,7 +84,7 @@ def givePermissions(request):
     if request.user.is_authenticated:
         if request.user.is_superuser:
             user = User.objects.get(username=request.POST.get("user"))
-            project = Project.objects.get(name=request.POST.get("project"))
+            project = Project.objects.get(name=request.POST.get("projectName"))
 
             if Permissions.objects.filter(user=user, project=project).exists():
                 return JsonResponse({"status": "error", "message": "Permissions already granted"})

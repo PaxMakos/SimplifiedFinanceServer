@@ -4,6 +4,8 @@ from django.http import JsonResponse, HttpResponse
 from ..models import Invoice
 from django.db import IntegrityError
 import os
+from django.db import models
+from ..operations.invoiceOperations import createInvoice
 
 
 @require_http_methods(["GET"])
@@ -57,15 +59,9 @@ def getInvoice(request, number):
 def createInvoice(request):
     if request.user.is_authenticated:
         try:
-            date = request.POST.get("date")
-            number = request.POST.get("number")
-            description = request.POST.get("description")
-            file = request.FILES.get("file")
+            invoice = createInvoice(request)
 
-            invoice = Invoice(date=date, number=number, description=description, file=file)
-            invoice.save()
-
-            return JsonResponse({"status": "success"})
+            return JsonResponse({"status": "success", "number": invoice.number})
         except IntegrityError:
             return JsonResponse({"status": "error", "message": "Invoice with this number already exists"})
         except Exception as e:
@@ -81,13 +77,9 @@ def updateInvoice(request, number):
         try:
             invoice = Invoice.objects.get(number=number)
 
-            date = request.POST.get("date")
-            description = request.POST.get("description")
-            file = request.FILES.get("file")
-
-            invoice.date = date
-            invoice.description = description
-            invoice.file = file
+            invoice.date = models.DateField(request.POST.get("invoiceDate"))
+            invoice.description = request.POST.get("invoiceDescription")
+            invoice.file = request.FILES.get("invoiceFile")
             invoice.save()
 
             return JsonResponse({"status": "success"})

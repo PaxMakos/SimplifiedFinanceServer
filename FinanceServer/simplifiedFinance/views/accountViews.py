@@ -22,9 +22,9 @@ def getAccounts(request):
 def createAccount(request):
     if request.user.is_authenticated:
         if request.user.is_superuser:
-            name = request.POST.get("name")
+            name = request.POST.get("accountName")
             accountNumber = request.POST.get("accountNumber")
-            balance = request.POST.get("balance")
+            balance = request.POST.get("accountBalance")
             account = SubAccount(name=name, accountNumber=accountNumber, balance=balance)
             account.save()
             return JsonResponse({"status": "success", "id": account.id})

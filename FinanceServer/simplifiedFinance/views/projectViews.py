@@ -22,11 +22,11 @@ def getProjects(request):
 def createProject(request):
     if request.user.is_authenticated:
         if request.user.is_superuser:
-            name = request.POST.get("name")
-            description = request.POST.get("description")
-            startDate = request.POST.get("startDate")
-            endDate = request.POST.get("endDate")
-            status = request.POST.get("status")
+            name = request.POST.get("projectName")
+            description = request.POST.get("projectDescription")
+            startDate = request.POST.get("projectStartDate")
+            endDate = request.POST.get("projectEndDate")
+            status = request.POST.get("projectStatus")
             project = Project(name=name, description=description, startDate=startDate, endDate=endDate, status=status)
             project.save()
             return JsonResponse({"status": "success", "id": project.id})
