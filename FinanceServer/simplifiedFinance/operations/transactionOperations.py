@@ -7,8 +7,11 @@ def createTransaction(request, invoice=None):
     amount = float(request.POST.get("transactionAmount"))
     account = SubAccount.objects.get(name=request.POST.get("accountName"))
     vendor = Vendor.objects.get(name=request.POST.get("vendorName"))
-    project = Project.objects.get(name=request.POST.get("projectName"))
+    project = Project.objects.get(name=request.POST.get("projectName")) if request.POST.get("projectName") else None
     description = request.POST.get("transactionDescription")
+
+    account.balance += amount
+    account.save()
 
     transaction = Transaction(date=date,
                               title=title,

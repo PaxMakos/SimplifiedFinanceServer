@@ -1,4 +1,5 @@
 from ..models import Invoice
+from django.db import IntegrityError
 
 
 def createInvoice(request):
@@ -6,7 +7,10 @@ def createInvoice(request):
     number = request.POST.get("invoiceNumber")
     description = request.POST.get("invoiceDescription")
 
-    invoice = Invoice(date=date, number=number, description=description, file=request.FILES.get("file"))
-    invoice.save()
+    if Invoice.objects.filter(number=number).exists():
+        raise IntegrityError("Invoice already exists")
+    else:
+        invoice = Invoice(date=date, number=number, description=description, file=request.FILES.get("file"))
+        invoice.save()
 
-    return invoice
+        return invoice

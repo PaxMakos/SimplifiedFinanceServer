@@ -1,4 +1,5 @@
 from ..models import Vendor
+from django.db import IntegrityError
 
 
 def createVendor(request):
@@ -7,7 +8,10 @@ def createVendor(request):
     NIPNumber = request.POST.get("vendorNIPNumber")
     accountNumber = request.POST.get("vendorAccountNumber")
 
-    vendor = Vendor(name=name, address=address, NIPNumber=NIPNumber, accountNumber=accountNumber)
-    vendor.save()
+    if Vendor.objects.filter(name=name).exists():
+        raise IntegrityError("Vendor already exists")
+    else:
+        vendor = Vendor(name=name, address=address, NIPNumber=NIPNumber, accountNumber=accountNumber)
+        vendor.save()
 
-    return vendor
+        return vendor

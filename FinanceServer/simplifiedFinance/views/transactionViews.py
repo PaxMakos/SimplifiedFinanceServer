@@ -3,11 +3,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse
 from ..models import Invoice, Project, SubAccount, Vendor, Transaction, Permissions
 from django.core import serializers
-from django.db import IntegrityError
-import os
 from ..operations.invoiceOperations import createInvoice
 from ..operations.vendorsOperations import createVendor
-from ..operations.tranactionOperations import createTransaction
+from ..operations.transactionOperations import createTransaction
 
 
 @require_http_methods(["GET"])
@@ -104,6 +102,12 @@ def updateTransaction(request, transactionId):
         try:
             transaction = Transaction.objects.get(id=transactionId)
 
+            if transaction.amount != float(request.POST.get("transactionAmount")):
+                account = transaction.account
+                account.balance -= transaction.amount
+                account.balance += float(request.POST.get("transactionAmount"))
+                account.save()
+
             transaction.date = request.POST.get("transactionDate")
             transaction.title = request.POST.get("transactionTitle")
             transaction.amount = float(request.POST.get("transactionAmount"))
@@ -127,6 +131,10 @@ def deleteTransaction(request, transactionId):
     if request.user.is_authenticated:
         try:
             transaction = Transaction.objects.get(id=transactionId)
+
+            account = transaction.account
+            account.balance -= transaction.amount
+
             transaction.delete()
 
             return JsonResponse({"status": "success"})

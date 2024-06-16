@@ -85,6 +85,8 @@ def updateInvoice(request, number):
             return JsonResponse({"status": "success"})
         except Invoice.DoesNotExist:
             return JsonResponse({"status": "error", "message": "Invoice does not exist"})
+        except IntegrityError:
+            return JsonResponse({"status": "error", "message": "Invoice with this number already exists"})
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)})
     else:
@@ -94,7 +96,7 @@ def updateInvoice(request, number):
 @require_http_methods(["DELETE"])
 @csrf_exempt
 def deleteInvoice(request, number):
-    if request.user.is_authenticated:
+    if request.user.is_authenticated and request.user.is_superuser:
         try:
             invoice = Invoice.objects.get(number=number)
             invoice.delete()
@@ -102,7 +104,9 @@ def deleteInvoice(request, number):
             return JsonResponse({"status": "success"})
         except Invoice.DoesNotExist:
             return JsonResponse({"status": "error", "message": "Invoice does not exist"})
+        except IntegrityError:
+            return JsonResponse({"status": "error", "message": "Invoice is used in transactions"})
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)})
     else:
-        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+        return JsonResponse({"status": "error", "message": "User is not superuser"})

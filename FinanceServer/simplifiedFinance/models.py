@@ -14,7 +14,7 @@ def uploadTo(instance, filename):
 # Create your models here.
 class Invoice(models.Model):
     date = models.DateField()
-    number = models.CharField(max_length=100)
+    number = models.CharField(max_length=100, primary_key=True)
     description = models.TextField(null=True, blank=True)
     file = models.FileField(upload_to=uploadTo)
 
@@ -29,8 +29,7 @@ PROJECT_STATUS = [
 
 
 class Project(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, primary_key=True)
     description = models.TextField(null=True, blank=True)
     startDate = models.DateField()
     endDate = models.DateField()
@@ -41,8 +40,7 @@ class Project(models.Model):
 
 
 class SubAccount(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100, default=id)
+    name = models.CharField(max_length=100, primary_key=True)
     accountNumber = models.CharField(max_length=26)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
@@ -51,8 +49,7 @@ class SubAccount(models.Model):
 
 
 class Vendor(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, primary_key=True)
     address = models.TextField(null=True, blank=True)
     NIPNumber = models.CharField(max_length=10)
     accountNumber = models.CharField(max_length=26)

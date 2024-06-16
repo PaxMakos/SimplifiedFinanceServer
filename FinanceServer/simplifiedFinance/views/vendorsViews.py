@@ -21,28 +21,30 @@ def getVendors(request):
 @require_http_methods(["POST"])
 @csrf_exempt
 def createVendor(request):
-    if request.user.is_authenticated:
+    try:
+        if request.user.is_authenticated:
 
-        vendor = createVendor(request)
+            vendor = createVendor(request)
 
-        return JsonResponse({"status": "success", "id": vendor.id})
-    else:
-        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+            return JsonResponse({"status": "success", "id": vendor.id})
+        else:
+            return JsonResponse({"status": "error", "message": "User is not authenticated"})
+    except IntegrityError:
+        return JsonResponse({"status": "error", "message": "Vendor already exists"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
 
 
 @require_http_methods(["DELETE"])
 @csrf_exempt
 def deleteVendor(request, name):
     try:
-        if request.user.is_authenticated:
-            if request.user.is_superuser:
-                vendor = Vendor.objects.get(name=name)
-                vendor.delete()
-                return JsonResponse({"status": "success"})
-            else:
-                return JsonResponse({"status": "error", "message": "User is not a superuser"})
+        if request.user.is_authenticated and request.user.is_superuser:
+            vendor = Vendor.objects.get(name=name)
+            vendor.delete()
+            return JsonResponse({"status": "success"})
         else:
-            return JsonResponse({"status": "error", "message": "User is not authenticated"})
+            return JsonResponse({"status": "error", "message": "User is not a superuser"})
     except Vendor.DoesNotExist:
         return JsonResponse({"status": "error", "message": "Vendor does not exist"})
     except IntegrityError:
