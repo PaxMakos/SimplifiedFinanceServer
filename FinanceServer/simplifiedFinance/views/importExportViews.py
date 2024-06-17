@@ -133,6 +133,7 @@ def pathCheck():
 
 
 @require_http_methods(["GET"])
+@csrf_exempt
 def exportProjects(request):
     try:
         if request.user.is_authenticated:
@@ -152,6 +153,7 @@ def exportProjects(request):
 
 
 @require_http_methods(["GET"])
+@csrf_exempt
 def exportVendors(request):
     try:
         if request.user.is_authenticated:
@@ -171,6 +173,7 @@ def exportVendors(request):
 
 
 @require_http_methods(["GET"])
+@csrf_exempt
 def exportSubAccounts(request):
     try:
         if request.user.is_authenticated and request.user.is_superuser:
@@ -190,6 +193,7 @@ def exportSubAccounts(request):
 
 
 @require_http_methods(["GET"])
+@csrf_exempt
 def exportTransactions(request):
     try:
         if request.user.is_authenticated:

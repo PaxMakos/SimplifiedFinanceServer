@@ -1,11 +1,13 @@
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse
-from ..models import Invoice
+from ..models import Invoice, Vendor
 from django.db import IntegrityError
 import os
 from django.db import models
 from ..operations.invoiceOperations import createInvoice
+from ..operations.invoiceGenerator import generateInvoice as gi
+import json
 
 
 @require_http_methods(["GET"])
@@ -110,3 +112,33 @@ def deleteInvoice(request, number):
             return JsonResponse({"status": "error", "message": str(e)})
     else:
         return JsonResponse({"status": "error", "message": "User is not superuser"})
+
+
+@require_http_methods(["GET"])
+@csrf_exempt
+def generateInvoice(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        try:
+            invoiceData = {
+                "invoiceNumber": request.GET.get("invoiceNumber"),
+                "sellDate": request.GET.get("sellDate"),
+                "invoiceDate": request.GET.get("invoiceDate"),
+                "paymentTo": request.GET.get("paymentTo"),
+                "vendorName": request.GET.get("vendorName"),
+                "vendorNIP": Vendor.objects.get(name=request.GET.get("vendorName")).NIPNumber,
+                "vendorPostCode": Vendor.objects.get(name=request.GET.get("vendorName")).postcode,
+                "vendorCity": Vendor.objects.get(name=request.GET.get("vendorName")).city,
+                "vendorStreet": Vendor.objects.get(name=request.GET.get("vendorName")).street,
+                "products": json.loads(request.GET.get("products"))
+            }
+
+            newInvoice = gi(invoiceData)
+            invoice = createInvoice(request, newInvoice)
+
+            return JsonResponse({"status": "success", "number": invoice.number})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)})
+    else:
+        return JsonResponse({"status": "error", "message": "User is not superuser"})
+
+
