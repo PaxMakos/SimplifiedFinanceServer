@@ -50,7 +50,9 @@ class SubAccount(models.Model):
 
 class Vendor(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
-    address = models.TextField(null=True, blank=True)
+    postcode = models.CharField(max_length=6, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    street = models.CharField(max_length=100, null=True, blank=True)
     NIPNumber = models.CharField(max_length=10)
     accountNumber = models.CharField(max_length=26)
 

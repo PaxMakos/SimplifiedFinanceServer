@@ -80,7 +80,7 @@ def getPermissions(request):
 
 @require_http_methods(["POST"])
 @csrf_exempt
-def givePermissions(request):
+def givePermission(request):
     if request.user.is_authenticated:
         if request.user.is_superuser:
             user = User.objects.get(username=request.POST.get("user"))
@@ -99,7 +99,7 @@ def givePermissions(request):
 
 @require_http_methods(["DELETE"])
 @csrf_exempt
-def removePermissions(request, user, project):
+def removePermission(request, user, project):
     if request.user.is_authenticated:
         if request.user.is_superuser:
             user = User.objects.get(username=user)

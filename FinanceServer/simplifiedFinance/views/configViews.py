@@ -37,8 +37,10 @@ def configure(request):
 
             file = open(os.path.join(os.path.dirname(__file__), "..", "config.json"), "w")
 
-            organization = request.POST.get("organization")
-            address = request.POST.get("address")
+            organization = request.POST.get("organisation")
+            postCode = request.POST.get("postCode")
+            city = request.POST.get("city")
+            street = request.POST.get("street")
             NIP = request.POST.get("NIP")
             accountNumber = request.POST.get("accountNumber")
             accountBalance = request.POST.get("accountBalance")
@@ -48,16 +50,15 @@ def configure(request):
             treasurerPassword = request.POST.get("treasurerPassword")
 
             config = {
-                "organization": organization,
-                "address": address,
+                "organisation": organization,
+                "postCode": postCode,
+                "city": city,
+                "street": street,
                 "NIP": NIP,
                 "accountNumber": accountNumber,
                 "treasurerName": treasurerName,
                 "treasurerLogin": treasurerLogin
             }
-
-            file.write(json.dumps(config))
-            file.close()
 
             SubAccount.objects.create(
                 name="Główny rachunek",
@@ -66,6 +67,9 @@ def configure(request):
             )
 
             User.objects.create_superuser(username=treasurerLogin, password=treasurerPassword)
+
+            file.write(json.dumps(config))
+            file.close()
 
             return JsonResponse({"success": True})
         except Exception as e:
