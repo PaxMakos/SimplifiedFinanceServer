@@ -26,17 +26,20 @@ def createAccount(request):
             accountNumber = request.POST.get("accountNumber")
             balance = request.POST.get("accountBalance")
 
+            if not name or not accountNumber or not balance:
+                return JsonResponse({"status": "error", "message": "Missing required fields"})
+
             if SubAccount.objects.filter(name=name).exists():
-                raise IntegrityError("Account already exists")
+                return JsonResponse({"status": "error", "message": "Account already exists"})
             else:
                 account = SubAccount(name=name, accountNumber=accountNumber, balance=balance)
                 account.save()
 
-                return JsonResponse({"status": "success", "id": account.id})
+                return JsonResponse({"status": "success", "id": account.name})
         else:
             return JsonResponse({"status": "error", "message": "User is not a superuser"})
-    except IntegrityError:
-        return JsonResponse({"status": "error", "message": "Account already exists"})
+    except IntegrityError as e:
+        return JsonResponse({"status": "error", "message": "Account already exists", "error": str(e)})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)})
 
