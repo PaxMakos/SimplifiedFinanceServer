@@ -20,6 +20,7 @@ urlpatterns = [
     path('register/', authViews.registerUser, name='registerUser'),
     path('sessionInfo/', authViews.sessionInfo, name='sessionInfo'),
     path('users/', authViews.getUsers, name='getUsers'),
+    path('isSuperuser/', authViews.isSuperuser, name='isSuperuser'),
     path('permissions/', authViews.getPermissions, name='getPermissions'),
     path('allPermissions/', authViews.getAllPermissions, name='getAllPermissions'),
     path('givePermission/', authViews.givePermission, name='givePermission'),
