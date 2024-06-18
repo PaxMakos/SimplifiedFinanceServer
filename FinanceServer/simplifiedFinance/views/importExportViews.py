@@ -9,8 +9,9 @@ import os
 @require_http_methods(["POST"])
 @csrf_exempt
 def importProjects(request):
-    if request.user.is_authenticated and request.user.is_superuser:
-        try:
+    # import projects from a CSV file
+    try:
+        if request.user.is_authenticated and request.user.is_superuser:
             file = request.FILES.get("file")
             projects = pd.read_csv(file)
             counter = 0
@@ -27,18 +28,19 @@ def importProjects(request):
                     project.save()
                     counter += 1
 
-            return JsonResponse({"message": f"Successfully imported {counter} projects."})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)})
-    else:
-        return JsonResponse({"status": "error", "message": "User is not a superuser"})
+            return JsonResponse({"status": "success", "message": f"Successfully imported {counter} projects."})
+        else:
+            return JsonResponse({"status": "error", "message": "User is not a superuser"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
 
 
 @require_http_methods(["POST"])
 @csrf_exempt
 def importVendors(request):
-    if request.user.is_authenticated and request.user.is_superuser:
-        try:
+    # import vendors from a CSV file
+    try:
+        if request.user.is_authenticated and request.user.is_superuser:
             file = request.FILES.get("file")
             vendors = pd.read_csv(file)
             counter = 0
@@ -54,18 +56,19 @@ def importVendors(request):
                     vendor.save()
                     counter += 1
 
-            return JsonResponse({"message": f"Successfully imported {counter} vendors."})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)})
-    else:
-        return JsonResponse({"status": "error", "message": "User is not a superuser"})
+            return JsonResponse({"status": "success", "message": f"Successfully imported {counter} vendors."})
+        else:
+            return JsonResponse({"status": "error", "message": "User is not a superuser"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
 
 
 @require_http_methods(["POST"])
 @csrf_exempt
 def importSubAccounts(request):
-    if request.user.is_authenticated and request.user.is_superuser:
-        try:
+    # import subaccounts from a CSV file
+    try:
+        if request.user.is_authenticated and request.user.is_superuser:
             file = request.FILES.get("file")
             subAccounts = pd.read_csv(file)
             counter = 0
@@ -80,18 +83,19 @@ def importSubAccounts(request):
                     subAccount.save()
                     counter += 1
 
-            return JsonResponse({"message": f"Successfully imported {counter} subaccounts."})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)})
-    else:
-        return JsonResponse({"status": "error", "message": "User is not a superuser"})
+            return JsonResponse({"status": "success", "message": f"Successfully imported {counter} subaccounts."})
+        else:
+            return JsonResponse({"status": "error", "message": "User is not a superuser"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
 
 
 @require_http_methods(["POST"])
 @csrf_exempt
 def importTransactions(request):
-    if request.user.is_authenticated and request.user.is_superuser:
-        try:
+    # import transactions from a CSV file
+    try:
+        if request.user.is_authenticated and request.user.is_superuser:
             file = request.FILES.get("file")
             transactions = pd.read_csv(file)
             counter = 0
@@ -120,14 +124,15 @@ def importTransactions(request):
                 transaction.save()
                 counter += 1
 
-            return JsonResponse({"message": f"Successfully imported {counter} transactions."})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)})
-    else:
-        return JsonResponse({"status": "error", "message": "User is not a superuser"})
+            return JsonResponse({"status": "success", "message": f"Successfully imported {counter} transactions."})
+        else:
+            return JsonResponse({"status": "error", "message": "User is not a superuser"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
 
 
 def pathCheck():
+    # Check if the exports directory exists, if not create it
     if not os.path.exists(os.path.join(os.path.dirname(__file__), "..", "exports")):
         os.makedirs(os.path.join(os.path.dirname(__file__), "..", "exports"))
 
@@ -135,8 +140,9 @@ def pathCheck():
 @require_http_methods(["GET"])
 @csrf_exempt
 def exportProjects(request):
+    # export projects to a CSV file
     try:
-        if request.user.is_authenticated:
+        if request.user.is_authenticated and request.user.is_superuser:
             pathCheck()
 
             projects = Project.objects.all()
@@ -147,7 +153,7 @@ def exportProjects(request):
             response["Content-Disposition"] = "attachment; filename=projects.csv"
             return response
         else:
-            return JsonResponse({"status": "error", "message": "User is not authenticated"})
+            return JsonResponse({"status": "error", "message": "User is not a superuser"})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)})
 
@@ -155,6 +161,7 @@ def exportProjects(request):
 @require_http_methods(["GET"])
 @csrf_exempt
 def exportVendors(request):
+    # export vendors to a CSV file
     try:
         if request.user.is_authenticated:
             pathCheck()
@@ -175,6 +182,7 @@ def exportVendors(request):
 @require_http_methods(["GET"])
 @csrf_exempt
 def exportSubAccounts(request):
+    # export subaccounts to a CSV file
     try:
         if request.user.is_authenticated and request.user.is_superuser:
             pathCheck()
@@ -187,7 +195,7 @@ def exportSubAccounts(request):
             response["Content-Disposition"] = "attachment; filename=subAccounts.csv"
             return response
         else:
-            return JsonResponse({"status": "error", "message": "User is not authenticated"})
+            return JsonResponse({"status": "error", "message": "User is not a superuser"})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)})
 
@@ -195,6 +203,7 @@ def exportSubAccounts(request):
 @require_http_methods(["GET"])
 @csrf_exempt
 def exportTransactions(request):
+    # export transactions to a CSV file
     try:
         if request.user.is_authenticated:
             pathCheck()

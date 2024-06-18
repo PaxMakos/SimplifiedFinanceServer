@@ -82,11 +82,11 @@ class Permissions(models.Model):
 
 class Return(models.Model):
     id = models.AutoField(primary_key=True)
-    project = models.ForeignKey(Project, on_delete=models.RESTRICT)
+    project = models.ForeignKey(Project, on_delete=models.RESTRICT, null=True, blank=True)
     title = models.CharField(max_length=100)
     date = models.DateField()
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField(null=True, blank=True)
     accountToReturn = models.CharField(max_length=26)
-    invoice = models.FileField(upload_to="%Y/waiting/")
+    invoice = models.FileField(upload_to="%Y/waiting/", null=True, blank=True)
 

@@ -9,17 +9,31 @@ from django.db import IntegrityError
 @require_http_methods(["GET"])
 @csrf_exempt
 def getAccounts(request):
-    if request.user.is_authenticated:
-        accounts = SubAccount.objects.all()
-        data = serializers.serialize("xml", accounts)
-        return HttpResponse(data, content_type="application/xml")
-    else:
-        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+    # If the user is authenticated, return all organization bank accounts
+    try:
+        if request.user.is_authenticated:
+            accounts = SubAccount.objects.all()
+
+            toReturn = []
+            # Serialize the accounts and return them as list of JSONs
+            for account in accounts:
+                toReturn.append({
+                    "name": account.name,
+                    "accountNumber": account.accountNumber,
+                    "balance": account.balance
+                })
+
+            return JsonResponse({"status": "success", "accounts": toReturn})
+        else:
+            return JsonResponse({"status": "error", "message": "User is not authenticated"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
 
 
 @require_http_methods(["POST"])
 @csrf_exempt
 def createAccount(request):
+    # If user is superuser, create a new organization bank account
     try:
         if request.user.is_authenticated and request.user.is_superuser:
             name = request.POST.get("accountName")
@@ -35,7 +49,7 @@ def createAccount(request):
                 account = SubAccount(name=name, accountNumber=accountNumber, balance=balance)
                 account.save()
 
-                return JsonResponse({"status": "success", "name": account.name})
+                return JsonResponse({"status": "success", "message": f"Account {name} created"})
         else:
             return JsonResponse({"status": "error", "message": "User is not a superuser"})
     except IntegrityError as e:
@@ -47,11 +61,12 @@ def createAccount(request):
 @require_http_methods(["DELETE"])
 @csrf_exempt
 def deleteAccount(request, name):
+    # If user is superuser, delete an organization bank account
     try:
         if request.user.is_authenticated and request.user.is_superuser:
             account = SubAccount.objects.get(name=name)
             account.delete()
-            return JsonResponse({"status": "success"})
+            return JsonResponse({"status": "success", "message": f"Account {name} deleted"})
         else:
             return JsonResponse({"status": "error", "message": "User is not a superuser"})
     except SubAccount.DoesNotExist:

@@ -10,21 +10,23 @@ from django.contrib.auth.models import User
 @require_http_methods(["GET"])
 @csrf_exempt
 def isConfigured(reguest):
+    # check if the app is configured
     try:
         file = open(os.path.join(os.path.dirname(__file__), "..", "config.json"), "r")
         file.close()
-        return JsonResponse({"configured": True})
+        return JsonResponse({"status": "success", "configured": True})
     except FileNotFoundError:
-        return JsonResponse({"configured": False})
+        return JsonResponse({"status": "success", "configured": False})
 
 
 @require_http_methods(["POST"])
 @csrf_exempt
 def configure(request):
+    # configure the app
     try:
         file = open(os.path.join(os.path.dirname(__file__), "..", "config.json"), "r")
         file.close()
-        return JsonResponse({"error": "Configuration already exists"})
+        return JsonResponse({"status": "error", "message": "Configuration already exists"})
     except FileNotFoundError:
         try:
             Transaction.objects.all().delete()
@@ -37,7 +39,7 @@ def configure(request):
 
             file = open(os.path.join(os.path.dirname(__file__), "..", "config.json"), "w")
 
-            organization = request.POST.get("organisation")
+            organisation = request.POST.get("organisation")
             postCode = request.POST.get("postCode")
             city = request.POST.get("city")
             street = request.POST.get("street")
@@ -46,11 +48,31 @@ def configure(request):
             accountBalance = request.POST.get("accountBalance")
             treasurerName = request.POST.get("treasurerName")
 
+            if organisation is None:
+                raise Exception("Missing organisation name")
+            if postCode is None:
+                raise Exception("Missing post code")
+            if city is None:
+                raise Exception("Missing city")
+            if street is None:
+                raise Exception("Missing street")
+            if NIP is None:
+                raise Exception("Missing NIP number")
+            if accountNumber is None:
+                raise Exception("Missing account number")
+            if accountBalance is None:
+                raise Exception("Missing account balance")
+            if treasurerName is None:
+                raise Exception("Missing treasurer name")
+
             treasurerLogin = request.POST.get("treasurerLogin")
             treasurerPassword = request.POST.get("treasurerPassword")
 
+            if treasurerLogin is None or treasurerPassword is None:
+                raise Exception("Missing treasurer login or password")
+
             config = {
-                "organisation": organization,
+                "organisation": organisation,
                 "postCode": postCode,
                 "city": city,
                 "street": street,
@@ -60,6 +82,9 @@ def configure(request):
                 "treasurerLogin": treasurerLogin
             }
 
+            file.write(json.dumps(config))
+            file.close()
+
             SubAccount.objects.create(
                 name="Główny rachunek",
                 accountNumber=accountNumber,
@@ -68,22 +93,20 @@ def configure(request):
 
             User.objects.create_superuser(username=treasurerLogin, password=treasurerPassword)
 
-            file.write(json.dumps(config))
-            file.close()
-
-            return JsonResponse({"success": True})
+            return JsonResponse({"status": "success", "message": "Configuration successful"})
         except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
+            return JsonResponse({"status": "error", "message": str(e)})
 
 
 @require_http_methods(["GET"])
 @csrf_exempt
 def getConfig(request):
+    # get configuration
     try:
         file = open(os.path.join(os.path.dirname(__file__), "..", "config.json"), "r")
         config = json.load(file)
         file.close()
 
-        return JsonResponse(config)
+        return JsonResponse({"status": "success", "configuration": config})
     except FileNotFoundError:
-        return JsonResponse({"error": "Config file not found"})
+        return JsonResponse({"status": "error", "message": "Configuration not found"})

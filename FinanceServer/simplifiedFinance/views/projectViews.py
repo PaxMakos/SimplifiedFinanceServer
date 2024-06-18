@@ -16,7 +16,7 @@ def getProjects(request):
             permissions = Permissions.objects.filter(user=request.user)
             projects = [p.project for p in permissions]
 
-        data = serializers.serialize("xml", projects)
+        data = serializers.serialize("json", projects)
         return HttpResponse(data, content_type="application/xml")
     else:
         return JsonResponse({"status": "error", "message": "User is not authenticated"})
