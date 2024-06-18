@@ -10,7 +10,12 @@ from django.db import IntegrityError
 @csrf_exempt
 def getProjects(request):
     if request.user.is_authenticated:
-        projects = Permissions.objects.filter(user=request.user).values("project")
+        projects = Project.objects.all()
+
+        if not request.user.is_superuser:
+            permissions = Permissions.objects.filter(user=request.user)
+            projects = [p.project for p in permissions]
+
         data = serializers.serialize("xml", projects)
         return HttpResponse(data, content_type="application/xml")
     else:
@@ -31,14 +36,18 @@ def createProject(request):
             if Project.objects.filter(name=name).exists():
                 raise IntegrityError("Project already exists")
             else:
-                project = Project(name=name, description=description, startDate=startDate, endDate=endDate, status=status)
+                project = Project(name=name,
+                                  description=description,
+                                  startDate=startDate,
+                                  endDate=endDate,
+                                  status=status)
                 project.save()
 
-            return JsonResponse({"status": "success", "id": project.id})
+            return JsonResponse({"status": "success", "name": project.name})
         else:
             return JsonResponse({"status": "error", "message": "User is not a superuser"})
-    except IntegrityError:
-        return JsonResponse({"status": "error", "message": "Project already exists"})
+    except IntegrityError as e:
+        return JsonResponse({"status": "error", "message": str(e)})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)})
 

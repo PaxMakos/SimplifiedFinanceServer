@@ -5,7 +5,7 @@ from ..models import Invoice, Vendor
 from django.db import IntegrityError
 import os
 from django.db import models
-from ..operations.invoiceOperations import createInvoice
+from ..operations.invoiceOperations import createInvoice as ci
 from ..operations.invoiceGenerator import generateInvoice as gi
 import json
 
@@ -61,7 +61,7 @@ def getInvoice(request, number):
 def createInvoice(request):
     if request.user.is_authenticated:
         try:
-            invoice = createInvoice(request)
+            invoice = ci(request)
 
             return JsonResponse({"status": "success", "number": invoice.number})
         except IntegrityError:
@@ -79,9 +79,12 @@ def updateInvoice(request, number):
         try:
             invoice = Invoice.objects.get(number=number)
 
-            invoice.date = models.DateField(request.POST.get("invoiceDate"))
+            if invoice.file:
+                os.remove(invoice.file.path)
+
+            invoice.date = request.POST.get("invoiceDate")
             invoice.description = request.POST.get("invoiceDescription")
-            invoice.file = request.FILES.get("invoiceFile")
+            invoice.file = request.FILES.get("file")
             invoice.save()
 
             return JsonResponse({"status": "success"})

@@ -9,6 +9,8 @@ def createInvoice(request, invoiceFile=None):
     number = request.POST.get("invoiceNumber")
     description = request.POST.get("invoiceDescription")
 
+    invoice = None
+
     if Invoice.objects.filter(number=number).exists():
         raise IntegrityError("Invoice already exists")
     else:
@@ -19,4 +21,4 @@ def createInvoice(request, invoiceFile=None):
             os.remove(invoiceFile.path)
         invoice.save()
 
-        return invoice
+    return invoice

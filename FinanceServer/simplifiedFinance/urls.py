@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path
 from .views import (configViews,
                     authViews,
                     accountViews,
@@ -19,9 +19,11 @@ urlpatterns = [
     path('logout/', authViews.logoutFromApp, name='logoutFromApp'),
     path('register/', authViews.registerUser, name='registerUser'),
     path('sessionInfo/', authViews.sessionInfo, name='sessionInfo'),
+    path('users/', authViews.getUsers, name='getUsers'),
     path('permissions/', authViews.getPermissions, name='getPermissions'),
+    path('allPermissions/', authViews.getAllPermissions, name='getAllPermissions'),
     path('givePermission/', authViews.givePermission, name='givePermission'),
-    path('removePermission/', authViews.removePermission, name='removePermission'),
+    path('removePermission/<str:user>/<str:project>', authViews.removePermission, name='removePermission'),
     path("isConfigured/", configViews.isConfigured, name="isConfigured"),
     path("configure/", configViews.configure, name="configure"),
     path("config/", configViews.getConfig, name="getConfig"),
@@ -36,7 +38,7 @@ urlpatterns = [
     path("downloadInvoice/<str:number>/", invoiceViews.downloadInvoice, name="downloadInvoice"),
     path("invoice/<str:number>/", invoiceViews.getInvoice, name="getInvoice"),
     path("createInvoice/", invoiceViews.createInvoice, name="createInvoice"),
-    path("updateInvoice/", invoiceViews.updateInvoice, name="updateInvoice"),
+    path("updateInvoice/<str:number>/", invoiceViews.updateInvoice, name="updateInvoice"),
     path("deleteInvoice/<str:number>/", invoiceViews.deleteInvoice, name="deleteInvoice"),
     path("generateInvoice/", invoiceViews.generateInvoice, name="generateInvoice"),
     path("projects/", projectViews.getProjects, name="getProjects"),

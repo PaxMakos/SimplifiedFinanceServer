@@ -35,7 +35,7 @@ def createAccount(request):
                 account = SubAccount(name=name, accountNumber=accountNumber, balance=balance)
                 account.save()
 
-                return JsonResponse({"status": "success", "id": account.name})
+                return JsonResponse({"status": "success", "name": account.name})
         else:
             return JsonResponse({"status": "error", "message": "User is not a superuser"})
     except IntegrityError as e:

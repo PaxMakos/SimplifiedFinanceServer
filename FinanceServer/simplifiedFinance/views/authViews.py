@@ -78,6 +78,27 @@ def getPermissions(request):
         return JsonResponse({"status": "error", "message": "User is not authenticated"})
 
 
+#dodaj URL
+@require_http_methods(["GET"])
+@csrf_exempt
+def getAllPermissions(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        permissions = Permissions.objects.all()
+        return JsonResponse({"status": "success",
+                             "permissions": [{"user": p.user.username,
+                                              "project": p.project.name} for p in permissions]})
+
+
+@require_http_methods(["GET"])
+@csrf_exempt
+def getUsers(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        users = User.objects.all()
+        return JsonResponse({"status": "success", "users": [u.username for u in users]})
+    else:
+        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+
+
 @require_http_methods(["POST"])
 @csrf_exempt
 def givePermission(request):
