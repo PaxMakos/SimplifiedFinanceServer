@@ -12,7 +12,7 @@ def importProjects(request):
     if request.user.is_authenticated and request.user.is_superuser:
         try:
             file = request.FILES.get("file")
-            projects = pd.read_xml(file)
+            projects = pd.read_csv(file)
             counter = 0
 
             for project in projects:
@@ -40,7 +40,7 @@ def importVendors(request):
     if request.user.is_authenticated and request.user.is_superuser:
         try:
             file = request.FILES.get("file")
-            vendors = pd.read_xml(file)
+            vendors = pd.read_csv(file)
             counter = 0
 
             for vendor in vendors:
@@ -67,7 +67,7 @@ def importSubAccounts(request):
     if request.user.is_authenticated and request.user.is_superuser:
         try:
             file = request.FILES.get("file")
-            subAccounts = pd.read_xml(file)
+            subAccounts = pd.read_csv(file)
             counter = 0
 
             for subAccount in subAccounts:
@@ -93,7 +93,7 @@ def importTransactions(request):
     if request.user.is_authenticated and request.user.is_superuser:
         try:
             file = request.FILES.get("file")
-            transactions = pd.read_xml(file)
+            transactions = pd.read_csv(file)
             counter = 0
 
             for transaction in transactions:
@@ -141,7 +141,7 @@ def exportProjects(request):
 
             projects = Project.objects.all()
             projects = pd.DataFrame(projects.values())
-            projects.to_csv(os.path.join(os.path.dirname(__file__), "..","exports", "projects.csv"), index=False)
+            projects.to_csv(os.path.join(os.path.dirname(__file__), "..", "exports", "projects.csv"), index=False)
 
             response = HttpResponse(open("projects.csv", "rb"), content_type="application/force-download")
             response["Content-Disposition"] = "attachment; filename=projects.csv"
@@ -161,7 +161,7 @@ def exportVendors(request):
 
             vendors = Vendor.objects.all()
             vendors = pd.DataFrame(vendors.values())
-            vendors.to_csv(os.path.join(os.path.dirname(__file__), "..","exports", "vendors.csv"), index=False)
+            vendors.to_csv(os.path.join(os.path.dirname(__file__), "..", "exports", "vendors.csv"), index=False)
 
             response = HttpResponse(open("vendors.csv", "rb"), content_type="application/force-download")
             response["Content-Disposition"] = "attachment; filename=vendors.csv"
@@ -181,7 +181,7 @@ def exportSubAccounts(request):
 
             subAccounts = SubAccount.objects.all()
             subAccounts = pd.DataFrame(subAccounts.values())
-            subAccounts.to_csv(os.path.join(os.path.dirname(__file__), "..","exports", "subAccounts.csv"), index=False)
+            subAccounts.to_csv(os.path.join(os.path.dirname(__file__), "..", "exports", "subAccounts.csv"), index=False)
 
             response = HttpResponse(open("subAccounts.csv", "rb"), content_type="application/force-download")
             response["Content-Disposition"] = "attachment; filename=subAccounts.csv"
@@ -212,7 +212,8 @@ def exportTransactions(request):
             transactions = transactions.filter(project=project) if project else transactions
 
             transactions = pd.DataFrame(transactions.values())
-            transactions.to_csv(os.path.join(os.path.dirname(__file__), "..","exports", "transactions.csv"), index=False)
+            transactions.to_csv(os.path.join(os.path.dirname(__file__), "..", "exports", "transactions.csv"),
+                                index=False)
 
             response = HttpResponse(open("transactions.csv", "rb"), content_type="application/force-download")
             response["Content-Disposition"] = "attachment; filename=transactions.csv"
