@@ -104,6 +104,10 @@ def deleteInvoice(request, number):
     if request.user.is_authenticated and request.user.is_superuser:
         try:
             invoice = Invoice.objects.get(number=number)
+
+            if invoice.file:
+                os.remove(invoice.file.path)
+
             invoice.delete()
 
             return JsonResponse({"status": "success"})
