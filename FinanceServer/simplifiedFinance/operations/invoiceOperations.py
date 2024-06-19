@@ -5,9 +5,14 @@ from django.db import IntegrityError
 
 
 def createInvoice(request, invoiceFile=None):
+    # creates a new invoice with the given data
+
     date = request.POST.get("invoiceDate")
     number = request.POST.get("invoiceNumber")
     description = request.POST.get("invoiceDescription")
+
+    if not date or not number:
+        raise ValueError("Missing required fields")
 
     invoice = None
 

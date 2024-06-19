@@ -9,8 +9,9 @@ import os
 @require_http_methods(["GET"])
 @csrf_exempt
 def generateGraph(request):
-    if request.user.is_authenticated:
-        try:
+    # Generate a graph of income and outcome in a given time period and project if specified
+    try:
+        if request.user.is_authenticated:
             startDate = request.GET.get("startDate")
             endDate = request.GET.get("endDate")
             project = request.GET.get("project")
@@ -40,9 +41,10 @@ def generateGraph(request):
                 response = HttpResponse(file.read(), content_type="image/png")
                 response["Content-Disposition"] = "attachment; filename=graph.png"
                 return response
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)})
-    else:
-        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+        else:
+            return JsonResponse({"status": "error", "message": "User is not authenticated"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
+
 
 

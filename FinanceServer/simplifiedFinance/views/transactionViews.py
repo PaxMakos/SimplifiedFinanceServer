@@ -1,8 +1,7 @@
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from ..models import Invoice, Project, SubAccount, Vendor, Transaction, Permissions
-from django.core import serializers
 from ..operations.invoiceOperations import createInvoice
 from ..operations.vendorsOperations import createVendor
 from ..operations.transactionOperations import createTransaction
@@ -11,8 +10,9 @@ from ..operations.transactionOperations import createTransaction
 @require_http_methods(["GET"])
 @csrf_exempt
 def getTransactions(request):
-    if request.user.is_authenticated:
-        try:
+    # returns transactions that user is authorized to see
+    try:
+        if request.user.is_authenticated:
             fromDate = request.GET.get("fromDate")
             toDate = request.GET.get("toDate")
 
@@ -22,114 +22,144 @@ def getTransactions(request):
                 projects = Permissions.objects.filter(user=request.user)
                 transactions = transactions.filter(project=projects)
 
-            data = serializers.serialize("xml", transactions)
-            return HttpResponse(data, content_type="application/xml")
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)})
-    else:
-        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+            toReturn = []
+
+            for transaction in transactions:
+                toReturn.append({
+                    "id": transaction.id,
+                    "date": transaction.date,
+                    "title": transaction.title,
+                    "amount": transaction.amount,
+                    "account": transaction.account.name,
+                    "vendor": transaction.vendor.name,
+                    "project": transaction.project.name,
+                    "description": transaction.description
+                })
+
+            return JsonResponse({"status": "success", "transactions": toReturn})
+        else:
+            return JsonResponse({"status": "error", "message": "User is not authenticated"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
 
 
 @require_http_methods(["POST"])
 @csrf_exempt
 def createTransactionBasic(request):
-    if request.user.is_authenticated:
-        try:
+    # creates a transaction with an existing invoice and vendor
+    try:
+        if request.user.is_authenticated:
             invoice = Invoice.objects.get(number=request.POST.get("invoiceNumber"))
 
             transaction = createTransaction(request, invoice)
 
-            return JsonResponse({"status": "success", "transaction": transaction.id})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)})
-    else:
-        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+            return JsonResponse({"status": "success", "message": f"Transaction {transaction.title} created"})
+        else:
+            return JsonResponse({"status": "error", "message": "User is not authenticated"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
 
 
 @require_http_methods(["POST"])
 @csrf_exempt
 def createTransactionWithInvoice(request):
-    if request.user.is_authenticated:
-        try:
+    # creates a transaction with a new invoice and existing vendor
+    try:
+        if request.user.is_authenticated:
             invoice = createInvoice(request)
             transaction = createTransaction(request, invoice)
 
-            return JsonResponse({"status": "success", "transaction": transaction.id})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)})
-    else:
-        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+            return JsonResponse({"status": "success",
+                                 "message": f"Transaction {transaction.title} and invoice {invoice.number} created"})
+        else:
+            return JsonResponse({"status": "error", "message": "User is not authenticated"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
 
 
 @require_http_methods(["POST"])
 @csrf_exempt
 def createTransactionNewVendor(request):
-    if request.user.is_authenticated:
-        try:
+    # creates a transaction with a new vendor and existing invoice
+    try:
+        if request.user.is_authenticated:
             vendor = createVendor(request)
             invoice = Invoice.objects.get(number=request.POST.get("invoiceNumber"))
 
             transaction = createTransaction(request, invoice)
 
-            return JsonResponse({"status": "success", "transaction": transaction.id, "vendor": vendor.id})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)})
-    else:
-        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+            return JsonResponse({"status": "success",
+                                 "message": f"Transaction {transaction.title} and vendor {vendor.name} created"})
+        else:
+            return JsonResponse({"status": "error", "message": "User is not authenticated"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
 
 
 @require_http_methods(["POST"])
 @csrf_exempt
 def createTransactionFull(request):
-    if request.user.is_authenticated:
-        try:
+    # creates a transaction with a new vendor and invoice
+    try:
+        if request.user.is_authenticated:
             invoice = createInvoice(request)
             vendor = createVendor(request)
 
             transaction = createTransaction(request, invoice)
 
-            return JsonResponse({"status": "success", "transaction": transaction.id, "vendor": vendor.id})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)})
-    else:
-        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+            return JsonResponse({"status": "success",
+                                 "message": f"Transaction {transaction.title}, vendor and invoice created"})
+        else:
+            return JsonResponse({"status": "error", "message": "User is not authenticated"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
 
 
 @require_http_methods(["POST"])
 @csrf_exempt
 def updateTransaction(request, transactionId):
-    if request.user.is_authenticated:
-        try:
+    # updates a transaction
+    try:
+        if request.user.is_authenticated:
             transaction = Transaction.objects.get(id=transactionId)
 
-            if transaction.amount != float(request.POST.get("transactionAmount")):
-                account = transaction.account
-                account.balance -= transaction.amount
-                account.balance += float(request.POST.get("transactionAmount"))
-                account.save()
-
-            transaction.date = request.POST.get("transactionDate")
-            transaction.title = request.POST.get("transactionTitle")
-            transaction.amount = float(request.POST.get("transactionAmount"))
-            transaction.account = SubAccount.objects.get(name=request.POST.get("accountName"))
-            transaction.vendor = Vendor.objects.get(name=request.POST.get("vendorName"))
-            transaction.project = Project.objects.get(name=request.POST.get("projectName"))
-            transaction.description = request.POST.get("transactionDescription")
+            if request.POST.get("transactionTitle"):
+                transaction.title = request.POST.get("transactionTitle")
+            if request.POST.get("transactionDate"):
+                transaction.date = request.POST.get("transactionDate")
+            if request.POST.get("transactionAmount"):
+                if transaction.amount != float(request.POST.get("transactionAmount")):
+                    account = transaction.account
+                    account.balance -= transaction.amount
+                    account.balance += float(request.POST.get("transactionAmount"))
+                    account.save()
+                    transaction.amount = float(request.POST.get("transactionAmount"))
+            if request.POST.get("accountName"):
+                transaction.account = SubAccount.objects.get(name=request.POST.get("accountName"))
+            if request.POST.get("vendorName"):
+                transaction.vendor = Vendor.objects.get(name=request.POST.get("vendorName"))
+            if request.POST.get("projectName"):
+                transaction.project = Project.objects.get(name=request.POST.get("projectName"))
+            if request.POST.get("transactionDescription"):
+                transaction.description = request.POST.get("transactionDescription")
 
             transaction.save()
 
-            return JsonResponse({"status": "success", "transaction": transaction.id})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)})
-    else:
-        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+            return JsonResponse({"status": "success", "message": f"Transaction {transaction.title} updated"})
+        else:
+            return JsonResponse({"status": "error", "message": "User is not authenticated"})
+    except Transaction.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Transaction does not exist"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
 
 
 @require_http_methods(["DELETE"])
 @csrf_exempt
 def deleteTransaction(request, transactionId):
-    if request.user.is_authenticated:
-        try:
+    # deletes a transaction if user is authenticated
+    try:
+        if request.user.is_authenticated:
             transaction = Transaction.objects.get(id=transactionId)
 
             account = transaction.account
@@ -137,10 +167,10 @@ def deleteTransaction(request, transactionId):
 
             transaction.delete()
 
-            return JsonResponse({"status": "success"})
-        except Transaction.DoesNotExist:
-            return JsonResponse({"status": "error", "message": "Transaction does not exist"})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)})
-    else:
-        return JsonResponse({"status": "error", "message": "User is not authenticated"})
+            return JsonResponse({"status": "success", "message": f"Transaction {transactionId} deleted"})
+        else:
+            return JsonResponse({"status": "error", "message": "User is not authenticated"})
+    except Transaction.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Transaction does not exist"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
