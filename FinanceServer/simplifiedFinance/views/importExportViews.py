@@ -212,7 +212,9 @@ def exportTransactions(request):
             toDate = request.GET.get("toDate")
             project = Project.objects.get(name=request.GET.get("project")) if request.GET.get("project") else None
 
-            transactions = Transaction.objects.filter(date__range=[fromDate, toDate])
+            transactions = Transaction.objects.all()
+            transactions = transactions.filter(date__gte=fromDate) if fromDate else transactions
+            transactions = transactions.filter(date__lte=toDate) if toDate else transactions
 
             if not request.user.is_superuser:
                 projects = Permissions.objects.filter(user=request.user)
