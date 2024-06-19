@@ -38,6 +38,7 @@ urlpatterns = [
     path("exportTransactions/", importExportViews.exportTransactions, name="exportTransactions"),
     path("downloadInvoice/<str:number>/", invoiceViews.downloadInvoice, name="downloadInvoice"),
     path("invoice/<str:number>/", invoiceViews.getInvoice, name="getInvoice"),
+    path("invoices/", invoiceViews.getInvoices, name="getInvoices"),
     path("createInvoice/", invoiceViews.createInvoice, name="createInvoice"),
     path("updateInvoice/<str:number>/", invoiceViews.updateInvoice, name="updateInvoice"),
     path("deleteInvoice/<str:number>/", invoiceViews.deleteInvoice, name="deleteInvoice"),

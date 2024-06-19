@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from ..models import Vendor
 from django.db import IntegrityError
-from ..operations.vendorsOperations import createVendor
+from ..operations.vendorsOperations import cv
 
 
 @require_http_methods(["GET"])
@@ -38,7 +38,7 @@ def createVendor(request):
     try:
         if request.user.is_authenticated:
 
-            vendor = createVendor(request)
+            vendor = cv(request)
 
             return JsonResponse({"status": "success", "message": f"Vendor {vendor.name} created"})
         else:

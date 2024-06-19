@@ -1,4 +1,4 @@
-from ..models import Transaction, Vendor, SubAccount, Invoice, Project
+from ..models import Transaction, Vendor, SubAccount, Project
 
 
 def createTransaction(request, invoice=None):
