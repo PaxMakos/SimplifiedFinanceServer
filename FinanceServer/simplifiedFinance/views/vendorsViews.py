@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from ..models import Vendor
 from django.db import IntegrityError
-from ..operations.vendorsOperations import cv
+from ..operations.vendorsOperations import createVendor as cv
 
 
 @require_http_methods(["GET"])
