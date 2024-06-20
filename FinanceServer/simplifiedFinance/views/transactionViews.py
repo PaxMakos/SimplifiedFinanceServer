@@ -5,6 +5,7 @@ from ..models import Invoice, Project, SubAccount, Vendor, Transaction, Permissi
 from ..operations.invoiceOperations import createInvoice
 from ..operations.vendorsOperations import createVendor
 from ..operations.transactionOperations import createTransaction
+from datetime import datetime
 
 
 @require_http_methods(["GET"])
@@ -16,24 +17,28 @@ def getTransactions(request):
             fromDate = request.GET.get("fromDate")
             toDate = request.GET.get("toDate")
 
-            transactions = Transaction.objects.filter(date__range=[fromDate, toDate])
+            transactions = Transaction.objects.all()
+
+            if fromDate:
+                transactions = transactions.filter(date__gte=datetime.strptime(fromDate, "%Y-%m-%d"))
+
+            if toDate:
+                transactions = transactions.filter(date__lte=datetime.strptime(toDate, "%Y-%m-%d"))
 
             if not request.user.is_superuser:
                 projects = Permissions.objects.filter(user=request.user)
                 transactions = transactions.filter(project=projects)
-
             toReturn = []
 
             for transaction in transactions:
-                toReturn.append({
-                    "id": transaction.id,
-                    "date": transaction.date,
-                    "title": transaction.title,
-                    "amount": transaction.amount,
-                    "account": transaction.account.name,
-                    "vendor": transaction.vendor.name,
-                    "project": transaction.project.name,
-                    "description": transaction.description
+                toReturn.append({"id": transaction.id,
+                                 "date": transaction.date,
+                                 "title": transaction.title,
+                                 "amount": transaction.amount,
+                                 "account": transaction.account.name,
+                                 "vendor": transaction.vendor.name,
+                                 "project": transaction.project.name,
+                                 "description": transaction.description
                 })
 
             return JsonResponse({"status": "success", "transactions": toReturn})
