@@ -4,6 +4,7 @@ from django.http import JsonResponse, HttpResponse
 from ..models import Vendor, Invoice, SubAccount, Transaction, Project, Permissions
 import pandas as pd
 import os
+from decimal import Decimal as decimal
 
 
 @require_http_methods(["POST"])
@@ -16,15 +17,15 @@ def importProjects(request):
             projects = pd.read_csv(file)
             counter = 0
 
-            for project in projects:
-                name = project.get("name")
+            for index, project in projects.iterrows():
+                name = project["name"]
 
                 if not Project.objects.filter(name=name).exists():
                     project = Project(name=name,
-                                      description=project.get("description"),
-                                      startDate=project.get("startDate"),
-                                      endDate=project.get("endDate"),
-                                      status=project.get("status"))
+                                      description=project["description"],
+                                      startDate=project["startDate"],
+                                      endDate=project["endDate"],
+                                      status=project["status"])
                     project.save()
                     counter += 1
 
@@ -38,21 +39,22 @@ def importProjects(request):
 @require_http_methods(["POST"])
 @csrf_exempt
 def importVendors(request):
-    # import vendors from a CSV file
     try:
         if request.user.is_authenticated and request.user.is_superuser:
             file = request.FILES.get("file")
             vendors = pd.read_csv(file)
             counter = 0
 
-            for vendor in vendors:
-                name = vendor.get("name")
+            for index, vendor in vendors.iterrows():
+                name = vendor["name"]
 
                 if not Vendor.objects.filter(name=name).exists():
                     vendor = Vendor(name=name,
-                                    address=vendor.get("address"),
-                                    NIPNumber=vendor.get("NIPNumber"),
-                                    accountNumber=vendor.get("accountNumber"))
+                                    postcode=vendor["postCode"],
+                                    city=vendor["city"],
+                                    street=vendor["street"],
+                                    NIPNumber=vendor["NIPNumber"],
+                                    accountNumber=vendor["accountNumber"])
                     vendor.save()
                     counter += 1
 
@@ -66,20 +68,19 @@ def importVendors(request):
 @require_http_methods(["POST"])
 @csrf_exempt
 def importSubAccounts(request):
-    # import subaccounts from a CSV file
     try:
         if request.user.is_authenticated and request.user.is_superuser:
             file = request.FILES.get("file")
             subAccounts = pd.read_csv(file)
             counter = 0
 
-            for subAccount in subAccounts:
-                name = subAccount.get("name")
+            for index, subAccount in subAccounts.iterrows():
+                name = subAccount["name"]
 
                 if not SubAccount.objects.filter(name=name).exists():
                     subAccount = SubAccount(name=name,
-                                            accountNumber=subAccount.get("accountNumber"),
-                                            balance=subAccount.get("balance"))
+                                            accountNumber=subAccount["accountNumber"],
+                                            balance=float(subAccount["balance"]))
                     subAccount.save()
                     counter += 1
 
@@ -93,35 +94,35 @@ def importSubAccounts(request):
 @require_http_methods(["POST"])
 @csrf_exempt
 def importTransactions(request):
-    # import transactions from a CSV file
     try:
         if request.user.is_authenticated and request.user.is_superuser:
             file = request.FILES.get("file")
             transactions = pd.read_csv(file)
             counter = 0
 
-            for transaction in transactions:
-                title = transaction.get("title")
-                amount = transaction.get("amount")
-                date = transaction.get("date")
-                account = SubAccount.objects.get(name=transaction.get("account"))
-                vendor = Vendor.objects.get(name=transaction.get("vendor"))
-                project = Project.objects.get(name=transaction.get("project")) if transaction.get("project") else None
-                description = transaction.get("description")
-                invoice = Invoice.objects.get(number=transaction.get("invoice")) if transaction.get("invoice") else None
+            for index, transaction in transactions.iterrows():
+                title = transaction["title"]
+                amount = float(transaction["amount"])
+                date = transaction["date"]
+                account = SubAccount.objects.get(name=transaction["account"])
+                vendor = Vendor.objects.get(name=transaction["vendor"])
+                project = Project.objects.get(name=transaction["project"]) if pd.notna(transaction["project"]) else None
+                description = transaction["description"]
+                invoice = Invoice.objects.get(number=transaction["invoice"]) if pd.notna(transaction["invoice"]) else None
 
-                account.balance += amount
+                transactionSaved = Transaction(date=date,
+                                               title=title,
+                                               amount=amount,
+                                               account=account,
+                                               vendor=vendor,
+                                               project=project,
+                                               description=description,
+                                               invoice=invoice)
+                transactionSaved.save()
+
+                account.balance += decimal(transactionSaved.amount)
                 account.save()
 
-                transaction = Transaction(date=date,
-                                          title=title,
-                                          amount=amount,
-                                          account=account,
-                                          vendor=vendor,
-                                          project=project,
-                                          description=description,
-                                          invoice=invoice)
-                transaction.save()
                 counter += 1
 
             return JsonResponse({"status": "success", "message": f"Successfully imported {counter} transactions."})

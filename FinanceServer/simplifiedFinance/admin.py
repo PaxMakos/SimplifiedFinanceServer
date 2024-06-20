@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Invoice, Project, SubAccount, Vendor, Transaction, Permissions
+from .models import Invoice, Project, SubAccount, Vendor, Transaction, Permissions, Return
 
 
 @admin.register(Invoice)
@@ -38,4 +38,11 @@ class TransactionAdmin(admin.ModelAdmin):
 class Permissions(admin.ModelAdmin):
     list_display = ["user", "project"]
     search_fields = ["user"]
+
+
+@admin.register(Return)
+class Returns(admin.ModelAdmin):
+    list_display = ["date", "title", "amount"]
+    search_fields = ["title"]
+
 

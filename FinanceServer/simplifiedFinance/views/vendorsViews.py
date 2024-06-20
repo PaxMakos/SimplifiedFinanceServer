@@ -19,7 +19,9 @@ def getVendors(request):
             for vendor in vendors:
                 toReturn.append({
                     "name": vendor.name,
-                    "address": vendor.address,
+                    "postCode": vendor.postCode,
+                    "city": vendor.city,
+                    "street": vendor.street,
                     "NIPNumber": vendor.NIPNumber,
                     "accountNumber": vendor.accountNumber
                 })
