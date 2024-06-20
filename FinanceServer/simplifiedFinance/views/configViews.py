@@ -29,13 +29,6 @@ def configure(request):
         return JsonResponse({"status": "error", "message": "Configuration already exists"})
     except FileNotFoundError:
         try:
-            Transaction.objects.all().delete()
-            SubAccount.objects.all().delete()
-            Vendor.objects.all().delete()
-            Permissions.objects.all().delete()
-            Project.objects.all().delete()
-            Invoice.objects.all().delete()
-            User.objects.all().delete()
 
             file = open(os.path.join(os.path.dirname(__file__), "..", "config.json"), "w")
 
