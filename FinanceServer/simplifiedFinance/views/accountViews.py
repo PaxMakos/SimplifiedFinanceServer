@@ -37,7 +37,7 @@ def createAccount(request):
         if request.user.is_authenticated and request.user.is_superuser:
             name = request.POST.get("accountName")
             accountNumber = request.POST.get("accountNumber")
-            balance = request.POST.get("accountBalance")
+            balance = float(request.POST.get("accountBalance"))
 
             if not name or not accountNumber or not balance:
                 return JsonResponse({"status": "error", "message": "Missing required fields"})

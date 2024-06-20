@@ -1,4 +1,5 @@
 from ..models import Transaction, Vendor, SubAccount, Project
+from decimal import Decimal as decimal
 
 
 def createTransaction(request, invoice=None):
@@ -15,7 +16,7 @@ def createTransaction(request, invoice=None):
     if not date or not title or not amount or not account or not vendor:
         raise ValueError("Missing required fields")
 
-    account.balance += amount
+    account.balance += decimal(amount)
     account.save()
 
     transaction = Transaction(date=date,

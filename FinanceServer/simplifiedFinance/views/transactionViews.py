@@ -37,7 +37,7 @@ def getTransactions(request):
                                  "amount": transaction.amount,
                                  "account": transaction.account.name,
                                  "vendor": transaction.vendor.name,
-                                 "project": transaction.project.name,
+                                 "project": transaction.project.name if transaction.project else None,
                                  "description": transaction.description
                 })
 
@@ -54,7 +54,10 @@ def createTransactionBasic(request):
     # creates a transaction with an existing invoice and vendor
     try:
         if request.user.is_authenticated:
-            invoice = Invoice.objects.get(number=request.POST.get("invoiceNumber"))
+            try:
+                invoice = Invoice.objects.get(number=request.POST.get("invoiceNumber"))
+            except:
+                invoice = None
 
             transaction = createTransaction(request, invoice)
 
